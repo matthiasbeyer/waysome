@@ -37,24 +37,24 @@
 #ifndef __WS_TESTS_TESTS_H__
 #define __WS_TESTS_TESTS_H__
 
-#define WS_TESTS_CHECK_MAIN_ADJUST(genf,ckflags)                   \
-    int                                                            \
-    main(                                                          \
-        int argc,                                                  \
-        char** argv                                                \
-    ) {                                                            \
-        Suite* s;                                                  \
-        SRunner* r;                                                \
-        int nfailed;                                               \
-                                                                   \
-        s = suite_generator_func();                                \
-        r = srunner_create(s);                                     \
-                                                                   \
-        srunner_run_all(r,ckflags);                                \
-        nfailed = srunner_ntests_failed(r);                        \
-                                                                   \
-        srunner_free(r);                                           \
-        return nfailed;                                            \
+#define WS_TESTS_CHECK_MAIN_ADJUST(genf,ckflags)                    \
+    int                                                             \
+    main(                                                           \
+        int argc,                                                   \
+        char** argv                                                 \
+    ) {                                                             \
+        Suite* s;                                                   \
+        SRunner* r;                                                 \
+        int nfailed;                                                \
+                                                                    \
+        s = genf();                                                 \
+        r = srunner_create(s);                                      \
+                                                                    \
+        srunner_run_all(r,ckflags);                                 \
+        nfailed = srunner_ntests_failed(r);                         \
+                                                                    \
+        srunner_free(r);                                            \
+        return nfailed;                                             \
     }
 
 
