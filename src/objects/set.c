@@ -108,7 +108,17 @@ ws_set_insert(
     struct ws_set* self,
     struct ws_object* obj
 ) {
-    return 0;
+    if (self && obj) {
+        int res = r_set_insert(self->set, obj);
+
+        if (res == 0 || res == -EEXIST) {
+            return 0;
+        }
+
+        return res;
+    }
+
+    return -EINVAL;
 }
 
 int
