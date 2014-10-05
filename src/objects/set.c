@@ -35,11 +35,60 @@
 
 #include "objects/set.h"
 
+/**
+ * Deinit callback for ws_set type
+ */
+static bool
+deinit_set(
+    struct ws_object* const self
+) {
+    if (self) {
+        return (0 == r_set_destroy(((struct ws_set*) self)->set));
+    }
+
+    return false;
+}
+
+/**
+ * Type information for ws_set type
+ */
+ws_object_type_id WS_OBJECT_TYPE_ID_SET = {
+    .supertype  = &WS_OBJECT_TYPE_ID_OBJECT,
+    .typestr    = "ws_set",
+
+    .deinit_callback = deinit_set,
+};
+
+/*
+ *
+ * Interface implementation
+ *
+ */
+
 int
 ws_set_init(
     struct ws_set* self
 ) {
-    return;
+    if (self) {
+        ws_object_init(&self->obj);
+
+        self->obj.id = &WS_OBJECT_TYPE_ID_SET;
+
+        self->set_config.cmpf = NULL;
+        self->set_config.copyf = NULL;
+        self->set_config.freef = NULL;
+        self->set_config.hashf = NULL;
+
+        self->set = r_set_new(&self->set_config);
+
+        if (!self->set) {
+            return -ENOMEM;
+        }
+
+        return 0;
+    }
+
+    return -EINVAL;
 }
 
 struct ws_set*
