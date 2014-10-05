@@ -3,6 +3,7 @@ find_package(Check)
 include_directories(
     ${PROJECT_SOURCE_DIR}/src
     ${PROJECT_SOURCE_DIR}/tests/check
+    ${CHECK_INCLUDE_DIRS}
 )
 
 #
