@@ -36,6 +36,16 @@
 #include "objects/set.h"
 
 /**
+ * Set configuration for libreset. Not meant to be public.
+ */
+static const struct r_set_cfg WS_SET_CONFIGURATION= {
+    .cmpf = NULL,
+    .copyf = NULL,
+    .freef = NULL,
+    .hashf = NULL,
+};
+
+/**
  * Deinit callback for ws_set type
  */
 static bool
@@ -74,12 +84,7 @@ ws_set_init(
 
         self->obj.id = &WS_OBJECT_TYPE_ID_SET;
 
-        self->set_config.cmpf = NULL;
-        self->set_config.copyf = NULL;
-        self->set_config.freef = NULL;
-        self->set_config.hashf = NULL;
-
-        self->set = r_set_new(&self->set_config);
+        self->set = r_set_new(&WS_SET_CONFIGURATION);
 
         if (!self->set) {
             return -ENOMEM;
