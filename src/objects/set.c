@@ -35,6 +35,30 @@
 
 #include "objects/set.h"
 
+/*
+ *
+ * Forward declarations
+ *
+ */
+
+/**
+ * Compare two objects
+ *
+ * @return 1 if both parameters point to the same objects, 0 otherwise
+ */
+static int
+cmp_objects(
+    void const* a, //!< object a
+    void const* b //!< object b
+);
+
+
+/*
+ *
+ * Internal structs
+ *
+ */
+
 /**
  * Set configuration for libreset. Not meant to be public.
  */
@@ -230,4 +254,21 @@ ws_set_select(
 
     return -EINVAL;
 }
+
+
+/*
+ *
+ * Internal implementation
+ *
+ */
+
+static int
+cmp_objects(
+    void const* a,
+    void const* b
+) {
+    // comparing the pointers is sufficient --at least for now.
+    return a == b;
+}
+
 
