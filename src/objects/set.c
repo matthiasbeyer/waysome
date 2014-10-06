@@ -40,9 +40,9 @@
  */
 static const struct r_set_cfg WS_SET_CONFIGURATION= {
     .cmpf = NULL,
-    .copyf = NULL,
-    .freef = NULL,
-    .hashf = NULL,
+    .copyf = (void const* (*)(void const*)) ws_object_getref,
+    .freef = (void (*)(void*)) ws_object_unref,
+    .hashf = (r_hash (*)(void const*)) ws_object_hash,
 };
 
 /**
