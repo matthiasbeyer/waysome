@@ -63,7 +63,7 @@ cmp_objects(
  * Set configuration for libreset. Not meant to be public.
  */
 static const struct r_set_cfg WS_SET_CONFIGURATION= {
-    .cmpf = NULL,
+    .cmpf = cmp_objects,
     .copyf = (void const* (*)(void const*)) ws_object_getref,
     .freef = (void (*)(void*)) ws_object_unref,
     .hashf = (r_hash (*)(void const*)) ws_object_hash,
