@@ -24,17 +24,23 @@ set (TEST_SUITES
 )
 
 #
-#
+# Generate CTest tests for each of the suites
 #
 if (${CHECK_FOUND})
     foreach(TEST_SUITE IN LISTS TEST_SUITES)
+        unset(TEST_SOURCES)
+        unset(TEST_LIBRARIES)
+        add_subdirectory("${TEST_SUITE}")
+
         set(TEST_EXE "check_${TEST_SUITE}.test")
         add_executable(${TEST_EXE} EXCLUDE_FROM_ALL
             "${TEST_SUITE}/${TEST_SUITE}_tests.c"
+            ${TEST_SOURCES}
         )
 
         target_link_libraries(${TEST_EXE}
             ${CHECK_LIBRARY}
+            ${TEST_LIBRARIES}
         )
 
         add_test("build_${TEST_EXE}" "${CMAKE_COMMAND}"
