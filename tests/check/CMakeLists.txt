@@ -30,7 +30,16 @@ if (${CHECK_FOUND})
     foreach(TEST_SUITE IN LISTS TEST_SUITES)
         unset(TEST_SOURCES)
         unset(TEST_LIBRARIES)
+        unset(TEST_INCLUDE_DIRS)
+        unset(TEST_DEFINITIONS)
         add_subdirectory("${TEST_SUITE}")
+
+        if (DEFINED TEST_INCLUDE_DIRS)
+            include_directories(${TEST_INCLUDE_DIRS})
+        endif()
+        if (DEFINED TEST_DEFINITIONS)
+            add_definitions(${TEST_DEFINITIONS})
+        endif()
 
         set(TEST_EXE "check_${TEST_SUITE}.test")
         add_executable(${TEST_EXE} EXCLUDE_FROM_ALL
