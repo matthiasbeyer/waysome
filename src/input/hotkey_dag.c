@@ -58,6 +58,30 @@ ws_hotkey_dag_deinit(
     //!< @todo implement (now _this_ will get complicated...)
 }
 
+struct ws_hotkey_dag_node*
+ws_hotkey_dag_next(
+    struct ws_hotkey_dag_node* node,
+    uint16_t code
+) {
+    struct ws_hotkey_dag_tab cur = node->table;
+
+    uint16_t step = 1 << (DAG_TAB_CHILD_NUM_EXP * cur.depth);
+
+    // move towards the bottom
+    while (cur.depth-- && cur.nodes.tab) {
+        // determine where to go next
+        cur.nodes.tab = cur.nodes.tab[(code - cur.start) / step];
+        step >>= DAG_TAB_CHILD_NUM_EXP;
+    }
+
+    // catch possible errors
+    if (!cur.nodes.dag) {
+        return NULL;
+    }
+
+    return cur.nodes.dag[code - cur.start];
+}
+
 int
 ws_hotkey_dag_insert(
     struct ws_hotkey_dag_node* node,
