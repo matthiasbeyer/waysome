@@ -30,8 +30,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "input/hotkeys.h"
+#include "action/manager.h"
 #include "input/hotkey_dag.h"
+#include "input/hotkey_event.h"
+#include "input/hotkeys.h"
+#include "objects/message/event.h"
 #include "util/cleaner.h"
 
 #define MAX_KEYS (16)
@@ -59,6 +62,12 @@ hotkeys_deinit(
     void* dummy
 );
 
+/**
+ * Reset the track list
+ */
+static void
+tracklist_reset(void);
+
 /*
  *
  * Interface implementation
@@ -81,10 +90,7 @@ ws_hotkeys_init(void) {
 
     ws_cleaner_add(hotkeys_deinit, NULL);
 
-    unsigned int pos = MAX_KEYS;
-    while (pos--) {
-        ws_hotkeys_ctx.key_pressed[pos] = KEY_RESERVED;
-    }
+    tracklist_reset();
 
     is_init = true;
     return 0;
@@ -97,7 +103,67 @@ bool
 ws_hotkeys_eval(
     struct input_event* ev
 ) {
-    //!< @todo implement
+    // get the key code
+    uint16_t code = ev->code;
+
+    // check whether the key was pressed or released
+    if (ev->value) {
+        // insert the key into the track list, not caring if it's full already
+        unsigned int pos = MAX_KEYS;
+        while (pos--) {
+            if (ws_hotkeys_ctx.key_pressed[pos] == KEY_RESERVED) {
+                ws_hotkeys_ctx.key_pressed[pos] = code;
+                break;
+            }
+        }
+
+        // jump to the next DAG node
+        ws_hotkeys_ctx.state = ws_hotkey_dag_next(ws_hotkeys_ctx.state, code);
+        if (!ws_hotkeys_ctx.state) {
+            // this key is not part of a keycombo
+            tracklist_reset();
+            return false;
+        }
+
+        return true;
+    }
+
+    // remove the key from the track list, not caring if we stored or not
+    unsigned int pos = MAX_KEYS;
+    bool is_empty = true;
+    while (pos--) {
+        if (pos == code) {
+            ws_hotkeys_ctx.key_pressed[pos] = KEY_RESERVED;
+        }
+        is_empty &= (ws_hotkeys_ctx.key_pressed[pos] == KEY_RESERVED);
+    }
+
+    // check whether we just removed the last key
+    if (!is_empty) {
+        // nope. Means the input still might be a key combo
+        return true;
+    }
+
+    // we have something which may be a key combo. Let's find out what to do
+    if (!ws_hotkeys_ctx.state->event) {
+        // nothing!
+        return false;
+    }
+
+    // construct the event to emit
+    struct ws_event* event;
+    event = ws_event_new(&ws_hotkeys_ctx.state->event->name, NULL);
+    if (!event) {
+        return false;
+    }
+
+    // emit the event
+    struct ws_reply* reply;
+    reply = ws_action_manager_process((struct ws_message*) event);
+    if (reply) {
+        ws_object_unref((struct ws_object*) reply);
+    }
+
     return false;
 }
 
@@ -112,5 +178,13 @@ hotkeys_deinit(
     void* dummy
 ) {
     ws_hotkey_dag_deinit(&ws_hotkeys_ctx.root);
+}
+
+static void
+tracklist_reset(void) {
+    unsigned int pos = MAX_KEYS;
+    while (pos--) {
+        ws_hotkeys_ctx.key_pressed[pos] = KEY_RESERVED;
+    }
 }
 
