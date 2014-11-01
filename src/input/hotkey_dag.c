@@ -55,6 +55,15 @@ __ws_nonnull__(1)
 ;
 
 /**
+ */
+static void
+destruct_dag_node(
+    struct ws_hotkey_dag_node* node //!< node to destruct
+)
+__ws_nonnull__(1)
+;
+
+/**
  * Initialize a bunch of nodes, if neccessary
  *
  * @return 0 if the tab is initialized, a negative error number otherwise
@@ -72,6 +81,14 @@ __ws_nonnull__(1)
  */
 static void**
 create_tab_node(void);
+
+/**
+ */
+static void
+destruct_tab_node(
+    void** tab_node, //!< tab node to destruct
+    uint8_t depth //!< depth of the node to destruct
+);
 
 
 /*
@@ -93,7 +110,12 @@ void
 ws_hotkey_dag_deinit(
     struct ws_hotkey_dag_node* entry_node
 ) {
-    //!< @todo implement (now _this_ will get complicated...)
+    destruct_tab_node(entry_node->table.nodes.tab, entry_node->table.start);
+
+    // deinitialize events
+    if (entry_node->event) {
+        ws_object_unref(&entry_node->event->obj);
+    }
 }
 
 struct ws_hotkey_dag_node*
@@ -235,5 +257,41 @@ enforce_tab_initialized(
 static void**
 create_tab_node(void) {
     return calloc(DAG_TAB_CHILD_NUM, sizeof(void*));
+}
+
+static void
+destruct_dag_node(
+    struct ws_hotkey_dag_node* node
+) {
+    // deinit and free
+    ws_hotkey_dag_deinit(node);
+    free(node);
+}
+
+static void
+destruct_tab_node(
+    void** tab_node,
+    uint8_t depth
+) {
+    if (!tab_node) {
+        // nothing to do
+        return;
+    }
+
+    --depth;
+
+    void** cur_node = tab_node + DAG_TAB_CHILD_NUM;
+    // iterate over all the nodes
+    while (cur_node-- > tab_node) {
+        // destruct children
+        if (depth) {
+            destruct_tab_node(cur_node, depth);
+        } else {
+            destruct_dag_node((struct ws_hotkey_dag_node*) cur_node);
+        }
+    }
+
+    // free this bit of memory
+    free(tab_node);
 }
 
