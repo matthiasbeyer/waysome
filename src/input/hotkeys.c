@@ -34,6 +34,7 @@
 #include "input/hotkey_dag.h"
 #include "input/hotkey_event.h"
 #include "input/hotkeys.h"
+#include "logger/module.h"
 #include "objects/message/event.h"
 #include "util/cleaner.h"
 
@@ -46,6 +47,7 @@ struct {
     struct ws_hotkey_dag_node root;
     struct ws_hotkey_dag_node* state;
     uint16_t key_pressed[MAX_KEYS];
+    struct ws_logger_context log;
 } ws_hotkeys_ctx;
 
 /*
@@ -82,6 +84,7 @@ ws_hotkeys_init(void) {
     }
     int res;
 
+
     res = ws_hotkey_dag_init(&ws_hotkeys_ctx.root);
     if (!res) {
         goto cleanup;
@@ -91,6 +94,8 @@ ws_hotkeys_init(void) {
     ws_cleaner_add(hotkeys_deinit, NULL);
 
     tracklist_reset();
+
+    ws_hotkeys_ctx.log.prefix = "[Input/Hotkeys] ";
 
     is_init = true;
     return 0;
@@ -122,9 +127,13 @@ ws_hotkeys_eval(
         if (!ws_hotkeys_ctx.state) {
             // this key is not part of a keycombo
             tracklist_reset();
+            ws_log(&ws_hotkeys_ctx.log, LOG_DEBUG,
+                   "Keycode %d not part of key-combo", code);
             return false;
         }
 
+        ws_log(&ws_hotkeys_ctx.log, LOG_INFO,
+               "Recognizing %d as part of key-combo", code);
         return true;
     }
 
@@ -144,6 +153,7 @@ ws_hotkeys_eval(
         return true;
     }
 
+    ws_log(&ws_hotkeys_ctx.log, LOG_INFO, "All keys released");
     // we have something which may be a key combo. Let's find out what to do
     if (!ws_hotkeys_ctx.state->event) {
         // nothing!
@@ -158,6 +168,13 @@ ws_hotkeys_eval(
     }
 
     // emit the event
+    {
+        char* buf = ws_string_raw(&ws_hotkeys_ctx.state->event->name);
+        ws_log(&ws_hotkeys_ctx.log, LOG_INFO, "Emitting event %s...",
+               buf ? buf : "unknown event");
+        free(buf);
+    }
+
     struct ws_reply* reply;
     reply = ws_action_manager_process((struct ws_message*) event);
     if (reply) {
