@@ -64,6 +64,20 @@ __ws_nonnull__(1)
 ;
 
 /**
+ * Remove an event from the tree given by it's root
+ *
+ * @return true if the node itself was removed, false otherwise
+ */
+static bool
+remove_from_dag_node(
+    struct ws_hotkey_dag_node* node, //!< node to destruct
+    struct ws_hotkey_event* event, //!< event to remove
+    uint_fast16_t lvl //!< code to remove
+)
+__ws_nonnull__(1)
+;
+
+/**
  * Initialize a bunch of nodes, if neccessary
  *
  * @return 0 if the tab is initialized, a negative error number otherwise
@@ -89,6 +103,20 @@ destruct_tab_node(
     void** tab_node, //!< tab node to destruct
     uint8_t depth //!< depth of the node to destruct
 );
+
+/**
+ * Remove an event from the tree given by it's root
+ *
+ * @return true if the node itself was removed, false otherwise
+ */
+static bool
+remove_from_tab_node(
+    struct ws_hotkey_dag_tab table, //!< table to remove the event from
+    struct ws_hotkey_event* event, //!< event to remove
+    uint_fast16_t lvl //!< code to remove
+)
+__ws_nonnull__(2)
+;
 
 
 /*
@@ -171,8 +199,10 @@ ws_hotkey_dag_remove(
     struct ws_hotkey_dag_node* node,
     struct ws_hotkey_event* event
 ) {
-    //!< @todo remove an event, then all nodes linking to it, ...
-    return -1;
+    if (remove_from_tab_node(node->table, event, 0)) {
+        memset(&node->table, 0, sizeof(node->table));
+    }
+    return 0;
 }
 
 
@@ -268,6 +298,35 @@ destruct_dag_node(
     free(node);
 }
 
+static bool
+remove_from_dag_node(
+    struct ws_hotkey_dag_node* node,
+    struct ws_hotkey_event* event,
+    uint_fast16_t lvl
+) {
+    // remove node if necessary
+    if (!node) {
+        return true;
+    }
+
+    // recurse if necessary
+    bool can_remove = false;
+    if (lvl < event->code_num) {
+        can_remove = remove_from_tab_node(node->table, event, lvl);
+    } else if (event == node->event) {
+        // remove the event
+        node->event = NULL;
+        ws_object_unref(&event->obj);
+        can_remove = (node->table.nodes.tab == NULL);
+    }
+
+    // free if necessary and return
+    if (can_remove) {
+        free(node);
+    }
+    return can_remove;
+}
+
 static void
 destruct_tab_node(
     void** tab_node,
@@ -293,5 +352,45 @@ destruct_tab_node(
 
     // free this bit of memory
     free(tab_node);
+}
+
+static bool
+remove_from_tab_node(
+    struct ws_hotkey_dag_tab table,
+    struct ws_hotkey_event* event,
+    uint_fast16_t lvl
+) {
+    if (!table.nodes.tab) {
+        // nothing to do
+        return true;
+    }
+
+    bool can_remove = true;
+    size_t shift_val = DAG_TAB_CHILD_NUM_EXP * table.depth;
+
+    // remove the event from the children
+    void** next = table.nodes.tab + ((event->codes[lvl] >> shift_val) &
+                                     (DAG_TAB_CHILD_NUM - 1));
+    if (table.depth) {
+        table.start &= (1 << shift_val) - 1;
+        --table.depth;
+        remove_from_tab_node(table, event, lvl);
+    } else {
+        remove_from_dag_node((struct ws_hotkey_dag_node*) next,
+                             event, lvl - 1);
+    }
+    *next = NULL;
+
+    next = table.nodes.tab + DAG_TAB_CHILD_NUM;
+    // iterate over all the nodes
+    while (next-- > table.nodes.tab) {
+        can_remove &= (NULL == next);
+    }
+
+    // free this bit of memory
+    if (can_remove) {
+        free(table.nodes.tab);
+    }
+    return can_remove;
 }
 
