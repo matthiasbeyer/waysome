@@ -167,6 +167,20 @@ ws_hotkeys_eval(
     return false;
 }
 
+int
+ws_hotkey_add(
+    struct ws_hotkey_event* event
+) {
+   return ws_hotkey_dag_insert(&ws_hotkeys_ctx.root, event);
+}
+
+int
+ws_hotkey_remove(
+    struct ws_hotkey_event* event
+) {
+    return ws_hotkey_dag_remove(&ws_hotkeys_ctx.root, event);
+}
+
 /*
  *
  * Internal implementation

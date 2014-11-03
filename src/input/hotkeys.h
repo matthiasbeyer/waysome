@@ -60,5 +60,29 @@ ws_hotkeys_eval(
 __ws_nonnull__(1)
 ;
 
+/**
+ * Add an event
+ *
+ * @return 0 on success, a negative error number if an error occured
+ */
+int
+ws_hotkey_add(
+    struct ws_hotkey_event* event //!< event to add
+)
+__ws_nonnull__(1)
+;
+
+/**
+ * Remove an event
+ *
+ * @return 0 on success, a negative error number if an error occured
+ */
+int
+ws_hotkey_remove(
+    struct ws_hotkey_event* event //!< event to remove
+)
+__ws_nonnull__(1)
+;
+
 #endif // __WS_INPUT_HOTKEYS_H__
 
