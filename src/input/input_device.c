@@ -35,6 +35,7 @@
 
 #include "compositor/cursor.h"
 #include "compositor/keyboard.h"
+#include "input/hotkeys.h"
 #include "input/input_device.h"
 #include "input/utils.h"
 #include "util/arithmetical.h"
@@ -242,6 +243,13 @@ watch_pointers(
         }
 
         if (ev.type == EV_KEY) {
+            // check whether the event is part of a key-combo
+            if (ws_hotkeys_eval(&ev)) {
+                // it is...
+                //!< @todo record key events for later replay
+                continue;
+            }
+
             if (BTN_MISC <= ev.code && ev.code <= BTN_GEAR_UP) {
                 handle_mouse_click_event(&ev);
                 continue;
