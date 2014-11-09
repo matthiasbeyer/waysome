@@ -169,6 +169,55 @@ START_TEST (test_input_dag_insert_hotkey_events_into_dag) {
 }
 END_TEST
 
+START_TEST (test_input_dag_insert_multiple) {
+    struct ws_hotkey_dag_node* node = calloc(1, sizeof(*node));
+    struct ws_hotkey_event* ev;
+    struct ws_string* name = ws_string_new();
+    struct ws_string* app = ws_string_new();
+
+    ws_string_set_from_raw(name, "testevent");
+    ws_hotkey_dag_init(node);
+    uint16_t trav_codes[] = {1, 3, 24};
+    ev = ws_hotkey_event_new(name, trav_codes, 3);
+
+    //trying to insert event that is already in DAG
+    ck_assert(ws_hotkey_dag_insert(node, ev) == 0);
+    ck_assert(ws_hotkey_dag_insert(node, ev) != 0);
+
+    //Remove an event, then try to insert it again
+    ck_assert(ws_hotkey_dag_remove(node, ev) == 0);
+    ck_assert(ws_hotkey_dag_insert(node, ev) == 0);
+
+    free(node);
+    ws_object_unref((struct ws_object*) ev);
+    ws_object_unref((struct ws_object*) name);
+}
+END_TEST
+
+START_TEST (test_input_dag_insert) {
+    struct ws_hotkey_dag_node* node = calloc(1, sizeof(*node));
+    struct ws_hotkey_event* ev;
+    size_t ev_ref_count;
+
+    ws_hotkey_dag_init(node);
+    
+    struct ws_string* name = ws_string_new();
+    ws_string_set_from_raw(name, "testevent");
+
+    ev = ws_hotkey_event_new(name, NULL, 0);
+    ev_ref_count = ev->obj.ref_counting.refcnt;
+
+    ck_assert(ev != NULL);
+    ck_assert(ws_hotkey_dag_insert(node, ev) == 0);
+    
+    ck_assert(ev_ref_count + 1 == ev->obj.ref_counting.refcnt);
+    ws_object_unref((struct ws_object*) ev);
+
+    free(node);
+    ws_object_unref((struct ws_object*) name);
+}
+END_TEST
+
 static Suite*
 input_dag_suite(void)
 {
@@ -179,6 +228,8 @@ input_dag_suite(void)
     // tcase_add_checked_fixture(tc, setup, cleanup); // Not used yet
 
     tcase_add_test(tc, test_input_dag_init);
+    tcase_add_test(tc, test_input_dag_insert);
+    tcase_add_test(tc, test_input_dag_insert_multiple);
     tcase_add_test(tc, test_input_dag_get_node_from_empty_node);
     tcase_add_test(tc, test_input_dag_remove_null_event);
     tcase_add_test(tc, test_input_dag_insert_hotkey_events_into_dag);
