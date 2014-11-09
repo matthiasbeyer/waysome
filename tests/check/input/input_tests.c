@@ -41,6 +41,8 @@
 
 #include "tests.h"
 #include "input/hotkey_dag.h"
+#include "input/hotkey_event.h"
+#include "objects/string.h"
 
 #include <stdlib.h>
 
@@ -48,6 +50,26 @@ START_TEST (test_input_dag_get_node_from_empty_node) {
     struct ws_hotkey_dag_node* node = calloc(1, sizeof(*node));
     ck_assert(node);
     ck_assert(NULL == ws_hotkey_dag_next(node, 0));
+    free(node);
+}
+END_TEST
+
+START_TEST (test_input_dag_remove_null_event) {
+    struct ws_hotkey_dag_node* node = calloc(1, sizeof(*node));
+    ck_assert(node);
+    ck_assert(0 == ws_hotkey_dag_init(node));
+
+    struct ws_string* name = ws_string_new();
+    ck_assert(name);
+
+    ws_string_set_from_raw(name, "name");
+
+    struct ws_hotkey_event* ev = ws_hotkey_event_new(name, NULL, 0);
+
+    ck_assert(0 == ws_hotkey_dag_remove(node, ev));
+
+    ws_object_unref((struct ws_object*) ev);
+    ws_object_unref((struct ws_object*) name);
     free(node);
 }
 END_TEST
@@ -62,6 +84,7 @@ input_dag_suite(void)
     // tcase_add_checked_fixture(tc, setup, cleanup); // Not used yet
 
     tcase_add_test(tc, test_input_dag_get_node_from_empty_node);
+    tcase_add_test(tc, test_input_dag_remove_null_event);
 
     return s;
 }
