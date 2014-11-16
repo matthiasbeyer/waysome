@@ -48,7 +48,59 @@
 
 #include "serialize/deserializer.h"
 #include "serialize/serializer.h"
+#include "serialize/json/deserializer.h"
+#include "serialize/json/serializer.h"
+#include "objects/message/message.h"
+#include "serialize/json/keys.h"
+#include "util/arithmetical.h"
 
+static const struct {
+    const char* in;
+    const char* out;
+} inputs[] = {
+    {
+        .in =   "{"
+                    "\"" TYPE "\": \"" TYPE_EVENT "\","
+                    "\"" EVENT_NAME "\": \"testevent\","
+                    "\"" EVENT_VALUE "\": 1"
+                "}",
+
+        .out =  "{\"event\":{\"context\":1,\"name\":\"testevent\"}}"
+    },
+};
+
+/*
+ *
+ * Test
+ *
+ */
+START_TEST (test_inout) {
+    int i = _i;
+    struct ws_deserializer* d = ws_serializer_json_deserializer_new();
+    ck_assert(d);
+
+    struct ws_serializer* s = ws_serializer_json_serializer_new();
+    ck_assert(s);
+
+    struct ws_message* message = NULL;
+    const char* msg = inputs[i].in;
+
+    ws_deserialize(d, &message, msg, strlen(msg));
+    ck_assert(message);
+
+    size_t nbuf = strlen(msg);
+    char buf[nbuf];
+    buf[nbuf - 1] = 0;
+    ws_serialize(s, buf, nbuf, message);
+
+    ck_assert(0 == strncmp(buf, inputs[i].out, strlen(inputs[i].out)));
+
+    ws_deserializer_deinit(d);
+    ws_serializer_deinit(s);
+    free(d);
+    free(s);
+}
+END_TEST
 
 /*
  *
@@ -64,7 +116,7 @@ json_serializer_transaction_suite(void)
 
     suite_add_tcase(s, tc);
 
-    // tcase_add_test(tc, test_function);
+    tcase_add_loop_test(tc, test_inout, 0, ARYLEN(inputs));
 
     return s;
 }
