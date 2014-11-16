@@ -1,6 +1,7 @@
 set(TEST_SUITES_SERIALIZER
     json_deserializer
     json_serializer
+    json_transaction
 )
 
 foreach(TEST IN LISTS TEST_SUITES_SERIALIZER)
