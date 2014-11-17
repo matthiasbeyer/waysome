@@ -67,6 +67,15 @@ static const struct {
 
         .out =  "{\"event\":{\"context\":1,\"name\":\"testevent\"}}"
     },
+    {
+        .in =   "{"
+                    "\"" TYPE "\": \"" TYPE_EVENT "\","
+                    "\"" EVENT_NAME "\": \"testevent\","
+                    "\"" EVENT_VALUE "\": \"testvalue\""
+                "}",
+
+        .out =  "{\"event\":{\"context\":\"testvalue\",\"name\":\"testevent\"}}"
+    },
 };
 
 /*
