@@ -81,6 +81,19 @@ publish_modes(
     void const* _mode
 );
 
+/**
+ * Callback command function for setting background
+ *
+ * Takes one argument:
+ *  - The path to the image (PNG) as string
+ *
+ * @memberof ws_monitor
+ */
+static int
+cmd_func_set_background(
+    union ws_value_union* stack // The stack to use
+);
+
 /*
  *
  * type variable
@@ -91,6 +104,7 @@ publish_modes(
  * Callback function table for commands
  */
 static const struct ws_object_function FUNCTIONS[] = {
+    { .name "setbgpng",         .func = cmd_func_set_background },
     { .name = NULL,             .func = NULL } // iteration stopper
 };
 
@@ -370,5 +384,13 @@ monitor_cmp(
             (mon1->fb_dev->fd < mon2->fb_dev->fd);
     }
     return 0;
+}
+
+static int
+cmd_func_set_background(
+    union ws_value_union* stack // The stack to use
+) {
+    //!< @todo implement
+    return -1;
 }
 
