@@ -191,6 +191,7 @@ ws_monitor_set_bg_from_path(
     }
 
     ws_buffer_blit(&self->buffer->obj.obj, &img->obj);
+    ws_object_unref(&img->obj.obj);
     return 0;
 }
 
