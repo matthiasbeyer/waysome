@@ -188,6 +188,19 @@ ws_monitor_set_bg_from_path(
     char const* path //!< The path to the background image
 );
 
+/**
+ * Set background of the monitor from a ws_image_buffer
+ *
+ * @memberof ws_monitor
+ *
+ * @return zero on success, else negative errno.h number
+ */
+int
+ws_monitor_set_bg_from_buffer(
+    struct ws_monitor* self, //!< The monitor object
+    struct ws_image_buffer* buff //!< The buffer to use
+);
+
 #endif // __WS_OBJECTS_MONITOR_H__
 
 /**

@@ -192,6 +192,19 @@ ws_monitor_set_bg_from_path(
     return 0;
 }
 
+int
+ws_monitor_set_bg_from_buffer(
+    struct ws_monitor* self, //!< The monitor object
+    struct ws_image_buffer* buff //!< The buffer to use
+) {
+    if (!self || !buff) {
+        return -EINVAL;
+    }
+
+    ws_buffer_blit(&self->buffer->obj.obj, &buff->obj);
+    return 0;
+}
+
 void
 ws_monitor_populate_fb(
     struct ws_monitor* self
