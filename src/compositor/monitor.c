@@ -174,6 +174,24 @@ ws_monitor_publish(
 
 }
 
+int
+ws_monitor_set_bg_from_path(
+    struct ws_monitor* self,
+    char const* path
+) {
+    if (!self || !path) {
+        return -EINVAL;
+    }
+
+    struct ws_image_buffer* img = ws_image_buffer_from_png(path);
+    if (!img) {
+        return -ENOENT;
+    }
+
+    ws_buffer_blit(&self->buffer->obj.obj, &img->obj);
+    return 0;
+}
+
 void
 ws_monitor_populate_fb(
     struct ws_monitor* self

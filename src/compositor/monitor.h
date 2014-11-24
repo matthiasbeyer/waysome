@@ -173,6 +173,21 @@ ws_monitor_publish(
     struct ws_monitor* self
 );
 
+/**
+ * Set background of monitor from path
+ *
+ * @warning does not check whether the path points to a readable PNG!
+ *
+ * @memberof ws_monitor
+ *
+ * @return zero on success, else negative errno.h number
+ */
+int
+ws_monitor_set_bg_from_path(
+    struct ws_monitor* self, //!< The monitor object
+    char const* path //!< The path to the background image
+);
+
 #endif // __WS_OBJECTS_MONITOR_H__
 
 /**
