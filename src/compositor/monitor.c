@@ -104,7 +104,7 @@ cmd_func_set_background(
  * Callback function table for commands
  */
 static const struct ws_object_function FUNCTIONS[] = {
-    { .name "setbgpng",         .func = cmd_func_set_background },
+    { .name = "setbgpng",         .func = cmd_func_set_background },
     { .name = NULL,             .func = NULL } // iteration stopper
 };
 
