@@ -277,8 +277,10 @@ blit_duck_on_monitor(
     }
     ws_log(&log_ctx, LOG_DEBUG, "Copying into monitor with name: %s",
             monitor->current_mode->mode.name);
-    ws_buffer_blit((struct ws_buffer*) monitor->buffer,
-            (struct ws_buffer*) duck);
+    if (ws_monitor_set_bg_from_buffer(monitor, duck) != 0) {
+        ws_log(&log_ctx, LOG_WARNING, "Setting BG for monitor %s failed",
+               monitor->current_mode->mode.name);
+    }
     return 0;
 }
 
