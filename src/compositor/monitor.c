@@ -44,6 +44,8 @@
 #include "logger/module.h"
 #include "objects/object.h"
 #include "util/wayland.h"
+#include "values/union.h"
+#include "values/value_type.h"
 
 /*
  *
@@ -421,7 +423,36 @@ static int
 cmd_func_set_background(
     union ws_value_union* stack // The stack to use
 ) {
-    //!< @todo implement
-    return -1;
+    union ws_value_union* retval = stack;
+    struct ws_monitor* mon;
+
+    if (ws_value_get_type(&stack->value) != WS_VALUE_TYPE_OBJECT_ID) {
+        return -EINVAL;
+    }
+
+    mon = (struct ws_monitor*) ws_value_object_id_get(&stack->object_id);
+
+    if (((struct ws_object*) mon)->id != &WS_OBJECT_TYPE_ID_MONITOR) {
+        return -EINVAL;
+    }
+
+    stack += 2;
+
+    if (ws_value_get_type(&stack->value) != WS_VALUE_TYPE_STRING) {
+        return -EINVAL;
+    }
+
+    struct ws_string* str   = ws_value_string_get(&stack->string);
+    const char* path        = ws_string_raw(str);
+
+    int res = ws_monitor_set_bg_from_path(mon, path);
+
+    int r;
+    r = ws_value_union_reinit(retval, WS_VALUE_TYPE_BOOL);
+    if (!r) {
+        return r;
+    }
+
+    return ws_value_bool_set(&retval->bool_, res == 0);
 }
 
