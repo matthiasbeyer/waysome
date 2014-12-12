@@ -1,5 +1,10 @@
 # Waysome
 
+| Branch  | Status |
+| ------- | ------ |
+| master  | [![Build Status](http://ci.neikos.me/v1/badge/github.com/waysome/waysome/status.svg?branch=master)](http://ci.neikos.me/github.com/waysome/waysome)  |
+| develop | [![Build Status](http://ci.neikos.me/v1/badge/github.com/waysome/waysome/status.svg?branch=develop)](http://ci.neikos.me/github.com/waysome/waysome) |
+
 Note: Waysome is work in progress and not ready or useable yet.
 
 Waysome is a window manager using wayland. It is especially made for powerusers
