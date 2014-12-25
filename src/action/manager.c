@@ -416,9 +416,10 @@ run_transaction(
     // run processor
     res = ws_processor_exec(&proc);
     if (res < 0) {
-        const char* errmsg = ws_errno_tostr(res);
+        char* errmsg = ws_errno_tostr(res);
         retval = (struct ws_reply*)
                  ws_error_reply_new(transaction, -res, errmsg, NULL);
+        free(errmsg);
         goto cleanup_processor;
     }
 

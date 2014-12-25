@@ -342,10 +342,11 @@ error_handling:
 
     if (res != EOF) {
         // some error occured
-        const char* errstr = ws_errno_tostr(res);
+        char* errstr = ws_errno_tostr(res);
         if (errstr) {
             ws_log(&log_ctx, LOG_ERR, "Error during serialization/send %s",
                    errstr);
+            free(errstr);
         }
     }
 
@@ -377,10 +378,11 @@ connection_processor_flush(
     }
 
     // some error occured
-    const char* errstr = ws_errno_tostr(res);
+    char* errstr = ws_errno_tostr(res);
     if (errstr) {
         ws_log(&log_ctx, LOG_ERR, "Error during serialization/send %s",
                errstr);
+        free(errstr);
     }
     ws_connection_manager_close_connection(proc);
 }

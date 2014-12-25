@@ -33,11 +33,11 @@
 #include "util/condition.h"
 #include "util/error.h"
 
-const char*
+char*
 ws_errno_tostr(
     int errnr
 ) {
-    return strerror(ABS(errnr));
+    return strdup(strerror(ABS(errnr)));
 }
 
 struct ws_value_string*

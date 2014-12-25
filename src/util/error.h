@@ -43,7 +43,7 @@
 /**
  * Translate an errno number to a char*.
  *
- * @warning The returned value can't be free()'d afterwards
+ * @note The returned value should be free()'d afterwards
  *
  * @note Both positive and negative errno values can be passed
  *
@@ -52,7 +52,7 @@
  *
  * @return Error description for the errno passed, NULL on failure (no memory)
  */
-const char*
+char*
 ws_errno_tostr(
     int errnr
 );
