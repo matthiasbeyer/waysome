@@ -33,11 +33,27 @@
 #include "util/condition.h"
 #include "util/error.h"
 
+static const struct {
+    char const* str;
+} ERROR_MAP[] = {
+    [WS_EUNKNOWN] = { .str = "Unknown error" },
+};
+
 char*
 ws_errno_tostr(
     int errnr
 ) {
-    return strdup(strerror(ABS(errnr)));
+    char const* str = NULL;
+
+    if (errnr < 0) {
+        str = strerror(-errnr);
+    } else {
+        if ((unsigned long) errnr < ARYLEN(ERROR_MAP)) {
+            str = ERROR_MAP[(enum ws_error) errnr].str;
+        }
+    }
+
+    return str ? strdup(str) : NULL;
 }
 
 struct ws_value_string*

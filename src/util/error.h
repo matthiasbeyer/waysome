@@ -41,7 +41,20 @@
 #define __WS_UTIL_ERROR_H__
 
 /**
+ * waysome error indicators
+ */
+enum ws_error {
+    WS_EUNKNOWN,
+};
+
+/**
  * Translate an errno number to a char*.
+ *
+ * errno.h values should be passed to this function as _negative_ values, so to
+ * get the error string description of ENOMEM, -ENOMEM must be passed.
+ *
+ * non-errno.h values should be passed as positive int values and will be used
+ * as `enum ws_error` types.
  *
  * @note The returned value should be free()'d afterwards
  *
