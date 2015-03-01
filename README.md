@@ -2,6 +2,17 @@
 
 Note: Waysome is work in progress and not ready or useable yet.
 
+## Call for help
+
+We ran into a serious problem with the DRM driver of the kernel returning an
+error value where we wouldn't expect one. We debugged the issue (the kernel
+driver) but we do not understand what went wrong.
+
+If you can help us with this, please have a look at PR #624 and contribute
+your opinion on the topic, we would highly appreciate it!
+
+---
+
 Waysome is a window manager using wayland. It is especially made for powerusers
 and people who like to configure their window manager very atomicly.
 
